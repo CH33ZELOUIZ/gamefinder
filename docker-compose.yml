@@ -1,0 +1,20 @@
+services:
+  gamefinder:
+    build: .
+    container_name: gamefinder
+    restart: unless-stopped
+    ports:
+      - "3020:3020"
+    env_file:
+      - .env
+    environment:
+      TZ: ${TZ:-UTC}
+      PORT: "3020"
+      DB_PATH: /data/gamefinder.db
+      ROMS_ROOT: /roms
+      DOWNLOADED_ROOT: /roms/Downloaded ROMS
+      ROMM_RESOURCES_ROOT: /romm_resources
+    volumes:
+      - ./data:/data
+      - ${ROMS_HOST_PATH:-./roms}:/roms
+      - ${ROMM_RESOURCES_HOST_PATH:-./romm_resources}:/romm_resources:ro

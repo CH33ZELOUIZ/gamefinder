@@ -1,0 +1,12 @@
+.env
+.env.*
+!.env.example
+/data/
+/roms/
+/romm_resources/
+__pycache__/
+*.py[cod]
+*.db
+*.sqlite*
+.pytest_cache/
+.venv/
