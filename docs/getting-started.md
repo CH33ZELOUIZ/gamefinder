@@ -1,32 +1,36 @@
 # Getting started
 
-GameFinder is a small Flask app that connects three pieces of a game-library workflow:
+GameFinder sits between three things I already had running:
 
-1. Prowlarr searches game/console-capable indexers.
-2. qBittorrent downloads selected results into a ROM/game category.
-3. A staging job hardlinks or copies completed payloads into a RomM-style library folder.
+1. Prowlarr searches the game/console indexers.
+2. qBittorrent downloads the result into a ROM/game category.
+3. GameFinder stages the finished payload into the RomM library folder by hardlinking when possible, or copying when hardlinks are not available.
 
 ## Basic flow
 
 ```text
 Browser -> GameFinder -> Prowlarr search
 Browser -> GameFinder -> qBittorrent add
-qBittorrent complete -> GameFinder job page -> library stage folder
+qBittorrent complete -> GameFinder jobs page -> RomM library folder
 ```
 
-## Required services
+## What you need
 
 - Prowlarr with at least one game/console-capable indexer.
-- qBittorrent Web API.
-- A filesystem location for incoming downloads.
-- A filesystem location for the final library.
-- Optional: RomM database/resources for landing-page widgets and thumbnails.
+- qBittorrent with the Web API reachable from the GameFinder container.
+- A path for incoming downloads.
+- A path for the final RomM-style library.
+- Optional: RomM database/resources if you want homepage widgets and cover thumbnails.
 
 ## Setup checklist
 
 1. Copy `.env.example` to `.env`.
-2. Set Prowlarr URL/API key.
-3. Set qBittorrent URL and credentials if needed.
-4. Set incoming and final library paths using the container path names.
-5. Start with Docker Compose.
-6. Open `/health` and `/` to confirm the app is ready.
+2. Set `PROWLARR_URL` and `PROWLARR_API_KEY`.
+3. Set `GAMEFINDER_INDEXER_IDS` to the Prowlarr indexers you actually want searched.
+4. Set `QBIT_URL` to the qBittorrent Web API endpoint GameFinder can reach.
+5. Set `QBIT_SAVE_PATH` and `ROMS_HOST_PATH` so both containers are looking at the same files.
+6. Set a real `SECRET_KEY`.
+7. Start it with Docker Compose.
+8. Open `/health`, then `/`, and try a small search.
+
+If search works but staging fails, check paths first. Almost every annoying setup issue is qBittorrent reporting a path from its own container that GameFinder cannot see.

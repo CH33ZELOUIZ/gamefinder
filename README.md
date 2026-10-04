@@ -1,23 +1,22 @@
 # GameFinder
 
-A small self-hosted Flask app that searches console/ROM-capable Prowlarr indexers,
-sends selected results to qBittorrent, and stages completed downloads into a RomM-style
-library layout while leaving the original torrent payload in place for seeding.
+GameFinder is a little Flask app I built for my homelab so I could search game-friendly Prowlarr indexers, send a result to qBittorrent, and have the finished download show up in my RomM library without breaking seeding.
+
+It is not a full download manager and it is not trying to replace RomM. It is just the missing glue between Prowlarr, qBittorrent, and a RomM-style `/roms/<platform>/roms` folder layout.
 
 ## What it does
 
-- Searches Prowlarr with console/ROM category scoping instead of blasting every indexer.
-- Lets you choose a platform/console and filters out movies, TV, music, books, and other non-game categories.
+- Searches only the Prowlarr indexers/categories you point it at, instead of hammering every movie/TV/general indexer.
+- Lets you pick a platform/console and filters out obvious non-game results.
 - Sends magnets or torrent files to qBittorrent under a dedicated category.
-- Polls qBittorrent job progress from a `/jobs` page.
-- Hardlinks completed payloads into `/roms/<platform>/roms` when possible, falling back to copy when needed.
-- Optionally reads RomM metadata/resources to render recommendation widgets and thumbnails on the landing page.
+- Shows transfer/staging progress on the `/jobs` page.
+- Hardlinks completed payloads into `/roms/<platform>/roms` when it can, and copies when it has to.
+- Leaves qBittorrent's original payload alone so the torrent can keep seeding.
+- Can read RomM database/artwork paths for homepage widgets and thumbnails if you wire that up.
 
 ## Safety and compliance notes
 
-This project is just glue between services you run. You are responsible for configuring legal indexers,
-obeying tracker/API rules, and downloading only content you are allowed to use. Do not commit API keys,
-passwords, private tracker details, or host-specific paths.
+This is just glue for services you already run. You are responsible for your own indexers, tracker/API rules, and what you download. Do not commit real API keys, passwords, private tracker names, or paths that expose your setup.
 
 ## Quick start
 
@@ -29,7 +28,7 @@ cp .env.example .env
 docker compose up -d --build
 ```
 
-Open <http://localhost:3020>.
+Then open <http://localhost:3020>.
 
 ## Required configuration
 
@@ -37,21 +36,22 @@ Open <http://localhost:3020>.
 | --- | --- |
 | `PROWLARR_URL` | Base URL for Prowlarr. |
 | `PROWLARR_API_KEY` | Prowlarr API key. Keep this secret. |
-| `GAMEFINDER_INDEXER_IDS` | Comma-separated Prowlarr indexer IDs to query. Use only game/console-capable indexers. |
+| `GAMEFINDER_INDEXER_IDS` | Comma-separated Prowlarr indexer IDs to search. Use game/console-capable indexers here. |
 | `QBIT_URL` | qBittorrent WebUI/API URL. |
-| `QBIT_CATEGORY` | qBittorrent category for GameFinder downloads, default `roms`. |
-| `QBIT_SAVE_PATH` | qBittorrent-side save path for incoming ROM downloads. |
-| `ROMS_HOST_PATH` | Host path mounted into the container as `/roms`. |
-| `SECRET_KEY` | Flask secret key for sessions. Set a long random value. |
+| `QBIT_CATEGORY` | qBittorrent category for GameFinder downloads. Defaults to `roms`. |
+| `QBIT_SAVE_PATH` | Save path qBittorrent should use for incoming ROM/game downloads. |
+| `ROMS_HOST_PATH` | Host path mounted into the GameFinder container as `/roms`. |
+| `SECRET_KEY` | Flask session secret. Set this to a long random value. |
 
-Optional RomM DB settings (`DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASSWD`) enable landing-page widgets.
-The app still works without them.
+Optional RomM DB settings (`DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASSWD`) power the homepage widgets. GameFinder still works without them.
+
+Optional basic auth is available with `GAMEFINDER_USER` and `GAMEFINDER_PASSWORD`. Leave them blank only if this is safely behind your own LAN/auth proxy.
 
 ## Path mapping
 
-qBittorrent may report paths from its own container namespace. If those paths do not exist inside the
-GameFinder container, set `QBIT_CONTAINER_ROOT` to the qBittorrent-side root that corresponds to
-GameFinder's `/roms` mount.
+The one thing to get right is paths. qBittorrent may report paths from its own container, while GameFinder only sees what is mounted at `/roms`.
+
+If qBittorrent says a file lives under a path GameFinder cannot see, set `QBIT_CONTAINER_ROOT` to the qBittorrent-side root that maps to GameFinder's `/roms` mount.
 
 Example:
 
@@ -60,6 +60,8 @@ QBIT_SAVE_PATH=/downloads/roms/_incoming
 QBIT_CONTAINER_ROOT=/downloads/roms
 ROMS_HOST_PATH=/srv/roms
 ```
+
+With that setup, qBittorrent can download to `/downloads/roms/_incoming`, while GameFinder sees the same files under `/roms/_incoming`.
 
 ## Development
 
