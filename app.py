@@ -11,9 +11,9 @@ import difflib
 from werkzeug.security import check_password_hash
 
 APP_PORT = int(os.getenv('PORT', '3020'))
-PROWLARR_URL = os.getenv('PROWLARR_URL', 'http://192.168.0.112:9696').rstrip('/')
+PROWLARR_URL = os.getenv('PROWLARR_URL', 'http://192.168.1.100:9696').rstrip('/')
 PROWLARR_API_KEY = os.getenv('PROWLARR_API_KEY', '')
-QBIT_URL = os.getenv('QBIT_URL', 'http://192.168.0.112:8181').rstrip('/')
+QBIT_URL = os.getenv('QBIT_URL', 'http://192.168.1.100:8181').rstrip('/')
 QBIT_CATEGORY = os.getenv('QBIT_CATEGORY', 'roms')
 QBIT_SAVE_PATH = os.getenv('QBIT_SAVE_PATH', '/media/ptw/roms/Downloaded ROMS/_incoming')
 ROMS_ROOT = Path(os.getenv('ROMS_ROOT', '/roms'))
@@ -24,7 +24,7 @@ ROMM_DB_HOST = os.getenv('DB_HOST', '')
 ROMM_DB_NAME = os.getenv('DB_NAME', 'romm')
 ROMM_DB_USER = os.getenv('DB_USER', '')
 ROMM_DB_PASSWORD = os.getenv('DB_PASSWD', '')
-ROMM_URL = os.getenv('ROMM_URL', 'http://192.168.0.112:8382').rstrip('/')
+ROMM_URL = os.getenv('ROMM_URL', 'http://192.168.1.100:8382').rstrip('/')
 POLL_SECONDS = int(os.getenv('POLL_SECONDS', '45'))
 PROWLARR_SEARCH_TIMEOUT = float(os.getenv('PROWLARR_SEARCH_TIMEOUT', '15'))
 # Keep GameFinder scoped to fast console/ROM indexers instead of asking every Prowlarr
